@@ -1,0 +1,147 @@
+---
+title: "Data Visualization - Mini-Project 2"
+author: "Alexander Go `ago0495@floridapoly.edu`"
+output:
+  html_document:
+    df_print: paged
+---
+
+_In this report, we explore daily eather data from the atl-weather dataset. This dataset contains information such as temperature, humidity and other weather conditions over a one year period._
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(scales)
+library(dplyr)
+library(plotly)
+library(maps)
+library(sf)
+```
+
+```{r, message=FALSE, warning=FALSE}
+weather_data <- read_csv("../data/atl-weather.csv")
+```
+
+## Visualizations
+
+---
+
+### 1. Temperature vs Humidity
+
+A scatter plot was created to show the relationship between temperature and humidity. We do this by mapping temperatureHigh to the x-axis and humidity to the y-axis. Both variables were normalized and combined into an RGB color scale to show overall weather conditions.
+
+```{r, message=FALSE, warning=FALSE}
+temperature_norm <- rescale(weather_data$temperatureHigh)
+humidity_norm <- rescale(weather_data$humidity)
+
+weather_data$weather_color <- rgb(
+  red = 1 - humidity_norm,
+  green = 1 - (temperature_norm + humidity_norm)/2,
+  blue = 1 - temperature_norm
+)
+
+p <- ggplot(data = weather_data, 
+            mapping = aes(
+              x = temperatureHigh,
+              y = humidity,
+              text = paste("Date: ", time),
+              color = weather_color
+            ))
+plot <- p + geom_point() +
+  scale_color_identity()
+  labs(
+    title = "Temperature vs Humidity",
+    x = "Temp",
+    y = "Humidty"
+  )
+
+
+ggplotly(
+  plot,
+  tooltip = "text"
+)
+
+
+```
+
+This chart shows how temperature and humidity relate to each other. There appears to be general grouping after 80 degrees where the humidity is typically around 40%-80%. Lower temperatures see more varied humidity.
+
+---
+
+### 2. Temperature Heatmap
+
+A heatmap was created as a spacial visualization to show how the highest temperature changed throughout the year. We do this by mapping the day of the month to the x-axis and the month to the y-axis.
+
+```{r, message=FALSE, warning=FALSE}
+
+weather_daily <- weather_data %>%
+  mutate(
+    date = as.Date(time),
+    month = month(date, label = TRUE),
+    day = day(date)
+  )
+
+p <- ggplot(
+  data = weather_daily,
+  mapping = aes(
+    x = day, 
+    y = month, 
+    fill = temperatureHigh,
+    text = paste(
+      "Date:", date,
+      "<br>Temp:", round(temperatureHigh, 1)
+      )
+    )) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "skyblue", high = "orange") +
+  labs(
+    title = "Highest Temperature Daily",
+    x = "Day of Month",
+    y = "Month",
+    fill = "Temp"
+  )
+
+ggplotly(p, tooltip = "text")
+```
+This heatmap shows the patterns in temperature throughout the year. Months where it was record with a high temperature are represented with a warm orange color, while lower temperature periods are shown with a cool blue color. The temperatures between high and low are some gradiant of the two colors. It is no surprise that the hottest months are in the middle of the year (June, July, August) and the cooler periods are at the beginning and end of the year (January and December)
+
+---
+
+### 3. Temperature and Humidity Over Time
+
+A line chart was created to show how temperature and humidity change over time. Since the two variables are on different scales, a scalling factor was used to fit both lines and a second y-axis is used.
+
+```{r, message=FALSE, warning=FALSE}
+
+scale_factor <- max(weather_data$temperatureHigh, na.rm = TRUE) / 
+                max(weather_data$humidity, na.rm = TRUE)
+
+p <- ggplot(weather_data, aes(x = time)) 
+
+p +
+  geom_line(aes(y = temperatureHigh, color = "Temperature")) +
+  geom_line(aes(y = humidity * scale_factor, color = "Humidity")) +
+  geom_smooth(aes(y = temperatureHigh, color = "Temperature")) +
+  geom_smooth(aes(y = humidity * scale_factor, color = "Humidity")) +
+  scale_y_continuous(
+    name = "Temperature",
+    sec.axis = sec_axis(~ . / scale_factor, name = "Humidity")
+  ) +
+  scale_color_manual(values = c("Temperature" = "orange", "Humidity" = "skyblue")) +
+  labs(
+    title = "Temperature and Humidity Over Time",
+    x = "Date",
+    y = "Value"
+  )
+```
+
+This chart better shows the overall trend of temperature and humidity over time. The smoothing lines help identify the general pattern due to the daily fluctuations of temperature. Here we can better see see the change in temperature as mentioned in the previous chart, the higher temperatures in the middle of the year and lower temperatures in the beginning and end. Humidity appears the fluctuate often, but the smoothed line suggests a general pattern where it peaks in the summer and winter seasons.
+
+---
+
+## Ending Remarks
+
+Originally I wanted to create a spatial visualization of Atlanta, however this data set did not have any data for mapping since it was only one location. Instead I opted for the heatmap visualization.
+
+Overall, based on these charts, we can see that temperature follows a clear seasonal trend. There are visible periods of high and low temperatures throughout the year. Humidity, while more varied, also appears to be slightly more humid during the hottest and coldest seasons. Humidity and Temperature may have some relationship, though not too apparent.
+
+Data visualization and design principles such as color and interactivity were applied to help communicate these insights. Color was used to show multiple variables in the scatter plot and to show intensity in the heatmap. Interactivity was provided through tooltips to make it easier to see the temperature and day of the point in the dataset.

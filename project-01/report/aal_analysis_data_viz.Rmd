@@ -1,0 +1,173 @@
+---
+title: "Data Visualization - Mini-Project 1"
+author: "Alexander Go `ago0495@floridapoly.edu"
+output:
+  html_document:
+    df_print: paged
+---
+
+_In this report, we explore pull request data from the AI Dev all_pull_request dataset. This dataset contains GitHub pull requests aided by AI coding agents and examines their activity, merge success, and overall performance._
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(scales)
+library(dplyr)
+```
+
+```{r}
+pull_request_data <- read.csv("../data/all_pull_request.csv")
+```
+
+## Visualizations
+
+---
+
+### 1. Pull Requests Count per Agent
+
+A bar chart was created to show the number of pull requests made by each agent. We do this by simply mapping the agent to the x axis of the chart and count the number of entries.
+
+```{r}
+p1 <- ggplot(data = pull_request_data,
+            mapping = aes(
+              x = agent,
+              fill = agent
+            ))
+```
+
+```{r}
+p1 + geom_bar() +
+  geom_text(aes(label = after_stat(count)), stat = "count", vjust = -0.5) +
+  scale_y_continuous(labels = label_number()) +
+  labs(title = "Pull Requests by Agent",
+       x = "Agent",
+       y = "Pull Requests Made")
+  
+```
+
+This dataset contains 5 AI agents, Claude_Code, Copilot, Cursor, Devin, and OpenAI_Codex. Out of these 5 agents, OpenAI_Codex was used significantly more than the others, with more than 800,000 pull requests created using OpenAI. This suggests that OpenAI_Codex is widely adopted for contributing to Software Engineering projects or is more available than others.
+
+---
+
+### 2. Merge Rate by Agent
+
+A stacked bar chart was used to show the proportion of merged, not merged, and open pull requests for each agent.
+
+```{r}
+
+df <- pull_request_data %>%
+  mutate(status = case_when(
+    !is.na(merged_at) & merged_at != "" ~ "Merged",
+    (is.na(merged_at) | merged_at == "") & (!is.na(closed_at) & closed_at != "") ~ "Not Merged",
+    TRUE ~ "Open"
+  )) %>%
+  count(agent, status) %>%
+  group_by(agent) %>%
+  mutate(prop = n / sum(n))
+
+df$status <- factor(df$status,
+                    levels = c("Open", "Not Merged", "Merged"))
+```
+
+```{r}
+p2 <- ggplot(data = df,
+             mapping = aes(x = agent, y = prop, fill = status)
+             )
+```
+
+```{r}
+p2 +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = scales::percent(prop)),
+            position = position_stack(vjust = 0.5)) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(
+    name = "Status",
+    values = c(
+      "Merged" = "#2da44e",
+      "Not Merged" = "#cf222e",
+      "Open" = "#8c959f"
+    )
+  ) +
+  labs(title = "Merge Rate",
+       y = "Percent",
+       x = "Agent")
+  
+```
+
+This chart shows how successful each agent is at getting their pull requests merged. OpenAI_Codex shows the highest success rate out of the 5 agents, with 87.66% of its pull requests being accepted. This could suggest better code quality or generates changes that better aligns with the project's requirements. This may also suggest better consistency in producing well structured changes, which would make pull requests easier to approve.
+
+---
+
+### 3. Time to Close Pull Requests
+
+A violin plot combined with a boxplot was used to show how long it takes for a pull request to be closed. The time it takes for a request to be closed is shown for each agent in the dataset. A log scale across the y axis was used to allow better visibility.
+
+```{r}
+df2 <- pull_request_data %>%
+  mutate(
+    created_at = na_if(created_at, ""),
+    closed_at  = na_if(closed_at, "")
+  ) %>%
+  mutate(
+    created_at = as.POSIXct(created_at, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+    closed_at  = as.POSIXct(closed_at,  format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+    time_to_close = as.numeric(closed_at - created_at, units = "days")
+  ) %>%
+  filter(!is.na(time_to_close))
+```
+
+```{r}
+p3 <- ggplot(df2, aes(x = agent, y = time_to_close, color = agent))
+```
+
+```{r}
+p3 + geom_violin(trim = FALSE, alpha = 0.3) +
+  geom_boxplot(width = 0.15, outlier.shape = NA) +
+  scale_y_log10(
+    breaks = c(
+      0.5/24,
+      1/24,
+      2/24,
+      6/24,
+      12/24,
+      1, 
+      2,
+      7,
+      14,
+      30,
+      90
+    ),
+    labels = c(
+      "30min",
+      "1h",
+      "2h",
+      "6h",
+      "12h",
+      "1d",
+      "2d",
+      "1w",
+      "2w",
+      "1m",
+      "3m"
+    )
+  ) +
+  labs(
+    title = "Turnaround Time",
+    x = "Agent",
+    y = "Time to Close"
+  )
+```
+
+Cursor and OpenAI_Codex appear to have the fastest turnaround time, both usually taking no longer than 30 minutes to be reviewed. This suggests that their pull requests are reviewed and accepted more quickly, possibly because they produce clearer changes or better quality updates.
+
+---
+
+## Ending Remarks
+
+Originally, I planned on creating a chart depicting a timeline of the merge rate for each agent to analyze how their performance changed over time (Did it get better? Did it get worse?). However, the dataset only spans about 8 months which was not enough time to show any clear trend.
+
+Overall, based on these charts, we can conclude that OpenAI_Codex is by far the most popular coding agent used by developers (according to this dataset). It has a significantly higher number of pull requests compared to other AI coding agents. This may be due to higher accessibility, but considering the more successful merge rate of OpenAI, may demonstrate higher quality changes such as better implementation and readability. As shown in the turnaround time, pull requests made by OpenAI tends to be reviewed within a few minutes of being created. Seeing how 87% of pull requests are accepted, these pull requests by OpenAI_Codex are quickly being accepted. The reason for this is unclear, as it could be small trivial changes or high quality updates that consistently stick to the project's convention and passes tests. 
+
+Data visualization and design principles such as color, scaling, and proportions were applied to help communicate these insights. Color was used to help visual separation of agents used in the dataset. Color was also used to help distinguish between merged, not merged, and open pull request status. Scaling was used to help handle large variability in turnaround time. Lastly, proportions or percent based charts were used for easier comparison between the merge rate of agents.
+
+---
