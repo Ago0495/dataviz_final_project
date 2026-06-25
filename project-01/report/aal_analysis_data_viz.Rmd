@@ -137,6 +137,7 @@ p <- ggplot(
 ```{r, message=FALSE, warning=FALSE}
 p + geom_violin(trim = FALSE, alpha = 0.3) +
   geom_boxplot(width = 0.15, outlier.shape = NA) +
+    scale_color_viridis_d(option = "turbo") +
   scale_y_log10(
     breaks = c(
       0.5/24,
