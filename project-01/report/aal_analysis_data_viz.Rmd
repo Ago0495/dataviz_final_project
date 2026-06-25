@@ -12,6 +12,7 @@ _In this report, we explore pull request data from the AI Dev all_pull_request d
 library(tidyverse)
 library(scales)
 library(dplyr)
+library(plotly)
 ```
 
 ```{r}
@@ -27,17 +28,23 @@ pull_request_data <- read.csv("../data/all_pull_request.csv")
 A bar chart was created to show the number of pull requests made by each agent. We do this by simply mapping the agent to the x axis of the chart and count the number of entries.
 
 ```{r}
-p1 <- ggplot(data = pull_request_data,
-            mapping = aes(
-              x = agent,
-              fill = agent
-            ))
-```
+p <- ggplot(
+  data = pull_request_data %>%
+    count(agent) %>%
+    mutate(agent = reorder(agent,n)),
+  mapping = aes(
+    x = agent,
+    y = n,
+    fill = agent
+    ))
 
-```{r}
-p1 + geom_bar() +
-  geom_text(aes(label = after_stat(count)), stat = "count", vjust = -0.5) +
+p + geom_col() + 
+  geom_text(aes(
+      label = scales::comma(n)),
+      vjust = -0.5
+    ) + 
   scale_y_continuous(labels = label_number()) +
+  scale_fill_viridis_d(option = "turbo") +
   labs(title = "Pull Requests by Agent",
        x = "Agent",
        y = "Pull Requests Made")
@@ -117,11 +124,18 @@ df2 <- pull_request_data %>%
 ```
 
 ```{r}
-p3 <- ggplot(df2, aes(x = agent, y = time_to_close, color = agent))
+p <- ggplot(
+  data = df2, 
+  mapping = aes(
+    x = agent, 
+    y = time_to_close, 
+    color = agent,
+    )
+  )
 ```
 
-```{r}
-p3 + geom_violin(trim = FALSE, alpha = 0.3) +
+```{r, message=FALSE, warning=FALSE}
+p + geom_violin(trim = FALSE, alpha = 0.3) +
   geom_boxplot(width = 0.15, outlier.shape = NA) +
   scale_y_log10(
     breaks = c(
@@ -155,7 +169,7 @@ p3 + geom_violin(trim = FALSE, alpha = 0.3) +
     title = "Turnaround Time",
     x = "Agent",
     y = "Time to Close"
-  )
+  ) 
 ```
 
 Cursor and OpenAI_Codex appear to have the fastest turnaround time, both usually taking no longer than 30 minutes to be reviewed. This suggests that their pull requests are reviewed and accepted more quickly, possibly because they produce clearer changes or better quality updates.
