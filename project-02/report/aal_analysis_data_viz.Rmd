@@ -43,7 +43,9 @@ p <- ggplot(data = weather_data,
             mapping = aes(
               x = temperatureHigh,
               y = humidity,
-              text = paste("Date: ", time),
+              text = paste("Date: ", time,
+                           "<br>Temp", temperatureHigh,
+                           "<br>Humidity", humidity),
               color = weather_color
             ))
 plot <- p + geom_point() +
@@ -92,7 +94,7 @@ p <- ggplot(
       )
     )) +
   geom_tile(color = "white") +
-  scale_fill_gradient(low = "skyblue", high = "orange") +
+  scale_fill_viridis_c(option = "plasma") +
   labs(
     title = "Highest Temperature Daily",
     x = "Day of Month",
@@ -102,7 +104,7 @@ p <- ggplot(
 
 ggplotly(p, tooltip = "text")
 ```
-This heatmap shows the patterns in temperature throughout the year. Months where it was record with a high temperature are represented with a warm orange color, while lower temperature periods are shown with a cool blue color. The temperatures between high and low are some gradiant of the two colors. It is no surprise that the hottest months are in the middle of the year (June, July, August) and the cooler periods are at the beginning and end of the year (January and December)
+This heatmap shows the patterns in temperature throughout the year. 
 
 ---
 
