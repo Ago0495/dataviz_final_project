@@ -73,6 +73,40 @@ This chart shows how temperature and humidity relate to each other. There appear
 
 A heatmap was created as a spacial visualization to show how the highest temperature changed throughout the year. We do this by mapping the day of the month to the x-axis and the month to the y-axis.
 
+BEFORE:
+```{r, message=FALSE, warning=FALSE}
+
+weather_daily <- weather_data %>%
+  mutate(
+    date = as.Date(time),
+    month = month(date, label = TRUE),
+    day = day(date)
+  )
+
+p <- ggplot(
+  data = weather_daily,
+  mapping = aes(
+    x = day, 
+    y = month, 
+    fill = temperatureHigh,
+    text = paste(
+      "Date:", date,
+      "<br>Temp:", round(temperatureHigh, 1)
+      )
+    )) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "skyblue", high = "orange") +
+  labs(
+    title = "Highest Temperature Daily",
+    x = "Day of Month",
+    y = "Month",
+    fill = "Temp"
+  )
+
+ggplotly(p, tooltip = "text")
+```
+
+IMPROVED:
 ```{r, message=FALSE, warning=FALSE}
 
 weather_daily <- weather_data %>%

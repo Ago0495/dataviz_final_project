@@ -177,7 +177,7 @@ p +
   
   labs(
     title = "Daily Precepitation 2022",
-    x = "Rail Fall",
+    x = "Rain Fall",
     y = "Number of Days"
   ) +
   

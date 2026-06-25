@@ -27,6 +27,27 @@ pull_request_data <- read.csv("../data/all_pull_request.csv")
 
 A bar chart was created to show the number of pull requests made by each agent. We do this by simply mapping the agent to the x axis of the chart and count the number of entries.
 
+BEFORE:
+```{r}
+p <- ggplot(
+  data = pull_request_data,
+  mapping = aes(
+    x = agent,
+    fill = agent
+    ))
+
+p + geom_bar() + 
+  geom_text(aes(
+      label = after_stat(count)),
+      stat = "count",
+      vjust = -0.5
+    ) + 
+  scale_y_continuous(labels = label_number()) +
+  labs(title = "Pull Requests by Agent",
+       x = "Agent",
+       y = "Pull Requests Made")
+```
+
 ```{r}
 p <- ggplot(
   data = pull_request_data %>%

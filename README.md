@@ -1,6 +1,6 @@
 # Data Visualization and Reproducible Research
 
-> Firstname Lastname. 
+> Alexander Go
 
 
 The following is a sample of products created during the _"Data Visualization and Reproducible Research"_ course.
@@ -8,36 +8,38 @@ The following is a sample of products created during the _"Data Visualization an
 
 ## Project 01
 
-In the `project_01/` folder you can find... _[add short description of your revised project here]_
+In the `project_01/` folder you can find an analysis project 
+exploring pull request data from the AI Dev all_pull_request dataset.
+This project examines AI agent activity, merge success, and overall performance.
 
 **Sample data visualization:** 
 
-_[include your favorite visualization from this project here]_
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/echarts.png" width="70%" height="70%">
+<img src="figures/000010.png">
 
 
 ## Project 02
 
-In this project, I explored ... _[short description of your revised project goes here]_ Find the code and report in the `project_02/` folder.
+In this project, I explored daily weather data from the atl-weather dataset. 
+This analysis temperature, humidity and other weather conditions over a one year period.
 
 **Sample data visualization:** 
 
-_[include your favorite visualization from this project here]_
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/fl_higher_ed.png" width="80%" height="80%">
-
-(you can place your figures in the `figures/` folder and use the `![](path_to_picture)` option to add the pictures here)
-
+<img src="figures/heatmap.png">
 
 ## Project 03
 
-In this project, I explored ... _[short description of the data visualizations you for this part of the project produced goes here]_
+In this project, I explored methods to create different types of data visualizations.
 
 **Sample data visualization:** 
 
-_[include your favorite visualization from this project here]_
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/concrete_density.png" width="80%" height="80%">
+<img src="wdQNUmN+I80cgAAAABJRU5ErkJggg==.png">
 
 
 ### Moving Forward
 
-_Please add here a short reflection on what you learned and what you plan to continue exploring in terms of data visualization, data storytelling, reproducible research, and/or related topics._
+Through these projects I learned how to design clear and effective visualizations.
+Design, clarity, and storytelling are important elements in creating
+visualizations that engages the viewer and helps bring your point across.
+Additionally I learned how to produce reproducible workflows and
+how to organize and share analysis. I plan to explore more interactive visualizations and improve my ability to tell 
+stories with data.

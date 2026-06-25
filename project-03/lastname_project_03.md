@@ -20,6 +20,7 @@ Using the dataset obtained from FSU's [Florida Climate Center](https://climatece
 
 ``` r
 library(tidyverse)
+library(ggridges)
 weather_tpa <- read_csv("https://raw.githubusercontent.com/aalhamadani/datasets/master/tpa_weather_2022.csv")
 # random sample 
 sample_n(weather_tpa, 4)
@@ -29,10 +30,10 @@ sample_n(weather_tpa, 4)
 ## # A tibble: 4 × 7
 ##    year month   day precipitation max_temp min_temp ave_temp
 ##   <dbl> <dbl> <dbl>         <dbl>    <dbl>    <dbl>    <dbl>
-## 1  2022     2    16       0             84       59     71.5
-## 2  2022     1    20       0             78       53     65.5
-## 3  2022     9    14       0.06          87       76     81.5
-## 4  2022     3    10       0.00001       84       72     78
+## 1  2022    12     5       0             81       63     72  
+## 2  2022     8     5       0.00001       96       78     87  
+## 3  2022    12    10       0             80       62     71  
+## 4  2022     2     8       0.35          56       53     54.5
 ```
 
 See Slides from Week 4 of Visualizing Relationships and Models (slide 10) for a reminder on how to use this type of dataset with the `lubridate` package for dates and times (example included in the slides uses data from 2016).
@@ -41,56 +42,163 @@ Using the 2022 data:
 
 (a) Create a plot like the one below:
 
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_facet.png" width="80%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_facet.png" alt="" width="80%" style="display: block; margin: auto;" />
 
 Hint: the option `binwidth = 3` was used with the `geom_histogram()` function.
 
+
+``` r
+p <- ggplot(data = weather_tpa,
+       mapping = aes(
+         x = max_temp,
+         fill = factor(month, levels = 1:12, labels = month.name)
+       ))
+
+p + geom_histogram(
+  binwidth = 3) +
+  
+  facet_wrap(~factor(month, levels = 1:12, labels = month.name)) + 
+  
+  scale_fill_viridis_d() +
+  
+  labs(
+    title = "Daily Max Temperatures 2022",
+    x = "Maximum Temperatures",
+    y = "Number of Days"
+  ) +
+  
+  theme(legend.position = "none")
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+
 (b) Create a plot like the one below:
 
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density.png" width="80%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density.png" alt="" width="80%" style="display: block; margin: auto;" />
 
 Hint: check the `kernel` parameter of the `geom_density()` function, and use `bw = 0.5`.
 
+
+``` r
+p <- ggplot(data = weather_tpa,
+            mapping = aes(
+              x = max_temp
+            ))
+
+p + geom_density(
+  kernal = "gaussian",
+  bw = 0.5,
+  fill = "darkgrey",
+  size = 1
+) +
+  
+  labs(
+    title = "Daily Max Temperatures 2022",
+    x = "Maximum Temperature",
+    y = "Density"
+  )
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+
 (c) Create a plot like the one below:
 
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density_facet.png" width="80%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_density_facet.png" alt="" width="80%" style="display: block; margin: auto;" />
 
 Hint: default options for `geom_density()` were used. 
+
+
+``` r
+p <- ggplot(data = weather_tpa,
+       mapping = aes(
+         x = max_temp,
+         fill = factor(month, levels = 1:12, labels = month.name)
+       ))
+
+p + geom_density() +
+  
+  facet_wrap(~factor(month, levels = 1:12, labels = month.name)) + 
+  
+  scale_fill_viridis_d() +
+  
+  labs(
+    title = "Density Plots for Each Month in 2022",
+    x = "Maximum Temperatures",
+  ) +
+  
+  theme(legend.position = "none")
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 (d) Generate a plot like the chart below:
 
 
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_ridges_plasma.png" width="80%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/tpa_max_temps_ridges_plasma.png" alt="" width="80%" style="display: block; margin: auto;" />
 
 Hint: use the`{ggridges}` package, and the `geom_density_ridges()` function paying close attention to the `quantile_lines` and `quantiles` parameters. The plot above uses the `plasma` option (color scale) for the _viridis_ palette.
 
 
+``` r
+p <- ggplot(data = weather_tpa,
+            mapping = aes(
+              x = max_temp,
+              y = factor(month, levels = 1:12, labels = month.name),
+              fill = after_stat(x)
+              ))
+
+p + geom_density_ridges_gradient(
+  quantile_lines = TRUE,
+  quantiles = 2
+) +
+  
+  scale_fill_viridis_c(option = "plasma",
+                       name = NULL) +
+  
+  labs(
+    title = "Max Temperature by Month 2022",
+    x = "Max Temperature",
+    y = ""
+  )
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
 (e) Create a plot of your choice that uses the attribute for precipitation _(values of -99.9 for temperature or -99.99 for precipitation represent missing data)_.
 
 
+``` r
+p <- ggplot(data = weather_tpa %>%
+              filter(precipitation != -99.99),
+            mapping = aes(
+              x = precipitation,
+         fill = factor(month, levels = 1:12, labels = month.name)
+            ))
+
+p +
+  geom_histogram(
+    binwidth = 0.2
+  ) +
+  
+  facet_wrap(~factor(month, levels = 1:12, labels = month.name))  + 
+  
+  scale_fill_viridis_d() +
+  
+  labs(
+    title = "Daily Precepitation 2022",
+    x = "Rain Fall",
+    y = "Number of Days"
+  ) +
+  
+  theme(legend.position = "none")
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
 
 ## PART 2 
-
-> **You can choose to work on either Option (A) or Option (B)**. Remove from this template the option you decided not to work on. 
-
-
-### Option (A): Visualizing Text Data
-
-Review the set of slides (and additional resources linked in it) for visualizing text data: Week 6 PowerPoint slides of Visualizing Text Data. 
-
-Choose any dataset with text data, and create at least one visualization with it. For example, you can create a frequency count of most used bigrams, a sentiment analysis of the text data, a network visualization of terms commonly used together, and/or a visualization of a topic modeling approach to the problem of identifying words/documents associated to different topics in the text data you decide to use. 
-
-Make sure to include a copy of the dataset in the `data/` folder, and reference your sources if different from the ones listed below:
-
-- [Billboard Top 100 Lyrics](https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/data/BB_top100_2015.csv)
-
-- [RateMyProfessors comments](https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/data/rmp_wit_comments.csv)
-
-- [FL Poly News Articles](https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/data/flpoly_news_SP23.csv)
-
-
-(to get the "raw" data from any of the links listed above, simply click on the `raw` button of the GitHub page and copy the URL to be able to read it in your computer using the `read_csv()` function)
-
 
 ### Option (B): Data on Concrete Strength 
 
@@ -132,15 +240,85 @@ new_concrete <- concrete %>%
 
 1. Explore the distribution of 2 of the continuous variables available in the dataset. Do ranges make sense? Comment on your findings.
 
+
+``` r
+p <- ggplot(
+    data = concrete,
+    mapping = aes(
+      x = Cement
+    )
+  )
+p + geom_histogram() +
+  labs(title = "Distribution of Cement",
+       x = "Cement kg")
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+p <- ggplot(
+    data = concrete,
+    mapping = aes(
+      x = Water
+    )
+  )
+p + geom_histogram() +
+  labs(title = "Distribution of Water",
+       x = "Water kg")
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+
+The distribution of cement is left skewed showing that most mixtures use less amounts of cement than others. Water is more normally distributed with most mixtures using 150-200 kg of water. These ranges seem reasonable given real world concrete composition constraints.
+
 2. Use a _temporal_ indicator such as the one available in the variable `Age` (measured in days). Generate a plot similar to the one shown below. Comment on your results.
 
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/concrete_strength.png" width="80%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/concrete_strength.png" alt="" width="80%" style="display: block; margin: auto;" />
 
+
+``` r
+p <- ggplot(
+    data = new_concrete,
+    mapping = aes(
+      x = factor(Age),
+      y = Concrete_compressive_strength,
+      fill = strength_range
+    )
+  )
+
+p + geom_boxplot()
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 3. Create a scatterplot similar to the one shown below. Pay special attention to which variables are being mapped to specific aesthetics of the plot. Comment on your results. 
 
-<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/cement_plot.png" width="80%" style="display: block; margin: auto;" />
+<img src="https://raw.githubusercontent.com/aalhamadani/dataviz_final_project/main/figures/cement_plot.png" alt="" width="80%" style="display: block; margin: auto;" />
 
 
+``` r
+p <- ggplot(
+  data = new_concrete,
+  mapping = aes(
+    x = Cement,
+    y = Concrete_compressive_strength,
+    size = Age,
+    color = Water,
+  ))
 
+p + geom_point(
+  alpha = 0.5,
+) +
+  labs(
+    title = "Strength vs (Cement, Water, Age)",
+    x = "Cement",
+    y = "Strength"
+  ) +
+  
+  scale_color_viridis_c()
+```
+
+![](lastname_project_03_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+
+This chart shows that higher cement content in addition with more water generally correlates with a higher compressive strength on concrete. Age > 300 tends to sit in the middle of the strength range.
 
